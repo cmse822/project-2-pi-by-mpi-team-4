@@ -8,7 +8,7 @@
  * AUTHOR: unknown
  * REVISED: 02/23/12 Blaise Barney
 ***************************************************************************/
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
 #include <iostream>
@@ -34,33 +34,28 @@ int numtasks, rank;
 
 start_time = MPI_Wtime();
    
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Init(&argc, &argv);
+MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-printf("Starting serial version of pi calculation using dartboard algorithm...\n");
+
+
 srandom (rank);            /* seed the random number generator */
 avepi = 0;
 for (i = 0; i < ROUNDS; i++) {
    /* Perform pi calculation on serial processor */
    pi = dboard(DARTS);
    avepi = ((avepi * i) + pi)/(i + 1); 
-   printf("   After %3d throws, average value of pi = %10.8f\n",
-         (DARTS * (i + 1)),avepi);
-   }    
-printf("\nReal value of PI: 3.1415926535897 \n");
+   // printf("   After %3d throws, average value of pi = %10.8f\n",
+   //       (DARTS * (i + 1)),avepi);
+    }    
+// printf("\nReal value of PI: 3.1415926535897 \n");
+
 
 //Compute the average of the results over all processes
-float globalmean, globalsum
-MPI_Allreduce(&avepi,&globalsum,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD)
-
-globalmean = globalsum / numtasks;
-
-if (rank = numtasks -1) {
-    cout << "The average value of PI using " << numtasks << "
-    Processors is " << globalmean <<  endl;
-}
-
+double globalmean, globalsum;
+MPI_Allreduce(&avepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+cout << "Average Value of PI on Process " << rank << " is " << avepi<< endl;
 
 MPI_Finalize();
 
@@ -68,9 +63,15 @@ end_time = MPI_Wtime();
 
 elapsed_time = end_time - start_time;
 
-cout << "Time elapsed " << elapsed_time << endl;
-
+//Output results only once 
+if (rank == (numtasks -1)) {
+   globalmean = globalsum / numtasks;
+   cout << "The average value of PI using " << numtasks << " Processors is " << globalmean <<  endl;
+   cout << "Time elapsed " << elapsed_time << " s"<<endl;
 }
+
+
+} //End of main function. 
 
 
 /*****************************************************************************
