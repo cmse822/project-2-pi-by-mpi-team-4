@@ -39,7 +39,7 @@ start_time = MPI_Wtime();
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 printf("Starting serial version of pi calculation using dartboard algorithm...\n");
-srandom (5);            /* seed the random number generator */
+srandom (rank);            /* seed the random number generator */
 avepi = 0;
 for (i = 0; i < ROUNDS; i++) {
    /* Perform pi calculation on serial processor */
