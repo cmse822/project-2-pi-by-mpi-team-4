@@ -28,7 +28,7 @@ double start_time, end_time, elapsed_time;
 
 int numtasks, rank;
 
-start_time = MPI_WTIME();
+start_time = MPI_Wtime();
    
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -48,7 +48,7 @@ printf("\nReal value of PI: 3.1415926535897 \n");
 
 MPI_Finalize();
 
-end_time = MPI_WTIME();
+end_time = MPI_Wtime();
 
 elapsed_time = end_time - start_time;
 
