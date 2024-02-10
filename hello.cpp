@@ -3,6 +3,8 @@
 
 using namespace std;
 
+cout << "Before initialize" << endl;
+
 int main(int argc, char* argv[]) 
 {
     int numtasks, rank;
@@ -11,5 +13,7 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     cout << "Hello, World! I am process " << rank << " of " << numtasks << endl;
     MPI_Finalize();
+
+    cout << "After initialize" << endl;
     return 0;
 }
