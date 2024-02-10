@@ -14,6 +14,9 @@
 #include <iostream>
 
 
+using namespace std;
+
+
 void srandom (unsigned seed);  
 double dboard (int darts);
 
