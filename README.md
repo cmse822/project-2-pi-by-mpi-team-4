@@ -21,8 +21,22 @@ In this project you will explore using basic MPI collectives on HPCC. After fini
 As a group, complete the following exercises from [HPSC](../assets/EijkhoutIntroToHPC2020.pdf). 
 
 - Exercise 2.18
+- - if b and c are modified while the parallel loop is updating a, this could lead to a race condition. 
+- - i needs to be a private index variable to each process. If two processors get the same i, they will update the same a.
 - Exercise 2.19
+ - - Processors share the same cache. Since the values on the same cacheline are updated by different processors, the cacheline would need to be frequently reloaded. 
+ - - The chunksize should be large enough so that the threads dont operate on data on the same cahceline. The chunk size should bea multiple of the cachesize. 
 - Exercise 2.21
+- -  for (i=0; i<ProblemSize; i++) {
+if (i==0)
+a[i] = (b[i]+b[i+1])/2
+else if (i==ProblemSize-1)
+a[i] = (b[i]+b[i-1])/2
+else
+a[i] = (b[i]+b[i-1]+b[i+1])/3
+}
+
+## need to account to b[i+1] and b[i-1] at the endpoints. may not want to divide by two.
 - Exercise 2.22
 - Exercise 2.23
 - Exercise 2.27
