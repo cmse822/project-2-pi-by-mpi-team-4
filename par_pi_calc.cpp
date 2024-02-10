@@ -21,7 +21,7 @@ void srandom (unsigned seed);
 double dboard (int darts);
 
 #define DARTS 10000   	/* number of throws at dartboard */
-#define ROUNDS 1    	/* number of times "darts" is iterated */
+#define ROUNDS 100   	/* number of times "darts" is iterated */
 
 int main(int argc, char *argv[])
 {
@@ -49,6 +49,18 @@ for (i = 0; i < ROUNDS; i++) {
          (DARTS * (i + 1)),avepi);
    }    
 printf("\nReal value of PI: 3.1415926535897 \n");
+
+//Compute the average of the results over all processes
+float globalmean, globalsum
+MPI_Allreduce(&avepi,&globalsum,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD)
+
+globalmean = globalsum / numtasks;
+
+if (rank = numtasks -1) {
+    cout << "The average value of PI using " << numtasks << "
+    Processors is " << globalmean <<  endl;
+}
+
 
 MPI_Finalize();
 
