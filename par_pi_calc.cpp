@@ -52,6 +52,8 @@ end_time = MPI_Wtime();
 
 elapsed_time = end_time - start_time;
 
+cout << "Time elapsed " << elapsed_time << endl;
+
 }
 
 
