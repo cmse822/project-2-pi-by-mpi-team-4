@@ -22,21 +22,12 @@ As a group, complete the following exercises from [HPSC](../assets/EijkhoutIntro
 
 - Exercise 2.18
 - - if b and c are modified while the parallel loop is updating a, this could lead to a race condition. 
-- - i needs to be a private index variable to each process. If two processors get the same i, they will update the same a.
+- - i needs to be a private index variable to each process. If two processors get the same i, they will update the same a, which leads to less than ideal efficiency.
 - Exercise 2.19
- - - Processors share the same cache. Since the values on the same cacheline are updated by different processors, the cacheline would need to be frequently reloaded. 
- - - The chunksize should be large enough so that the threads dont operate on data on the same cahceline. The chunk size should bea multiple of the cachesize. 
-- Exercise 2.21
-- -  for (i=0; i<ProblemSize; i++) {
-if (i==0)
-a[i] = (b[i]+b[i+1])/2
-else if (i==ProblemSize-1)
-a[i] = (b[i]+b[i-1])/2
-else
-a[i] = (b[i]+b[i-1]+b[i+1])/3
-}
+- - With a size of 1, several of the processes will copies of the same memory locations in their cachelines. When one processor updates the value of this memory location, it invalidates the cachelines of all other processors that also have this memory location in their cachelines. Therefore, maintaining cache coherence requires significant overhead with a small chunksize. The appropriate chunksize would be large enough to fill the cache of one procesor. With this strategy, each processor would have unique memory locations within their individual cache.
+- Exercise 2.21 (image below)
+![alt text](Exercise_2.21.png)
 
-## need to account to b[i+1] and b[i-1] at the endpoints. may not want to divide by two.
 - Exercise 2.22
 - Exercise 2.23
 - Exercise 2.27
@@ -93,7 +84,7 @@ The following is a very quick tutorial on the basics of using HPCC for this clas
     ```
 
 4. Add the commands `MPI_Init` and `MPI_Finalize` to your code. Put three different print statements in your code: one before the init, one between init and finalize, and one after the finalize. Recompile and run the executable, both in serial and with `mpiexec`, and explain the output.
- - - each processor outputs the print statements before the initialize statements, between the init and finalize statement, and after the finalize. each processor runs the entire executable, so executes all of the print statements. 
+ - - each processor outputs the print statements before the initialize statements, between the init and finalize statement, and after the finalize. each processor runs the entire executable, so executes all of the print statements
 
 5. Complete Exercises 2.3, 2.4, and 2.5 in the [Parallel Programing](../assets/EijkhoutParallelProgramming.pdf) book.
 
