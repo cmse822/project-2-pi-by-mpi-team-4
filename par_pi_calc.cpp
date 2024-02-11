@@ -67,7 +67,7 @@ elapsed_time = end_time - start_time;
 if (rank == (numtasks -1)) {
    globalmean = globalsum / numtasks;
    cout << "The average value of PI using " << numtasks << " Processors is " << globalmean <<  endl;
-   cout << "Time elapsed " << elapsed_time << " s"<<endl;
+   cout << "Time elapsed " << elapsed_time <<endl;
 }
 
 
