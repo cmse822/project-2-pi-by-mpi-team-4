@@ -103,6 +103,17 @@ Pi is the ratio of a circle's circumference to its diameter. As such, the value 
 
 5. For each processor count, plot the resulting errors in your computed values of `pi` compared to the true value as functions of the number of darts used to compute it. Use log-log scaling on this plot. What is the rate of convergence of your algorithm for computing `pi`? Does this value make sense? Does the error or rate of convergence to the correct answer vary with processor count? Should it? 
    
+   Let $N$ be the number of darts thrown. We can define the set of iid Bernoulli random variables, $\{X_n\}_{n=1}^{N}$, to represent the set the set of successful dart throws with success probability $p = \frac{\text{Area of Circle}}{\text{Square}} = \frac{\pi}{4}$. Then the variance of a dart throw is $var(X_n) = \sigma^2 = p(1-p) = \frac{\pi}{4}(1-\frac{\pi}{4})$. Summing over the set of throws, we get a new random variable that follows a Binomial distribution such that $\mathbb{E}(\{X_n\}_{n=1}^{N}) = Np$ and $var(\{X_n\}_{n=1}^{N}) = N\sigma^2$. Assuming a sufficiently large $N$, we can approximate the Binomial distribution as Normal, and thus $\{X_n\}_{n=1}^{N} \sim N(\mu = Np, \text{std} = \sqrt{Np(1-p)})$. We can standardize this distribution by introducing a new equivalent random variable $Z_N = \frac{\sum_{n=1}^{N}X_n - Np}{\sqrt{Np(1-p)}} \sim N(0, 1)$. Now we can construct a confidence interval; any percent will due. Thus, without loss of generality, let us construct a $95%$ confidence interval $\{\mu \pm 3\text{std}\} = \{\pm 3\sqrt{Np(1-p)}\}$. Consider the size of this confidence interval = $|\{\pm 3\sqrt{Np(1-p)}\}| = 6\sqrt{\frac{\pi}{4}(1-\frac{\pi}{4})} \sqrt{N}$. The confidence interval decreases proportionally to $\sqrt{N}$. Therefore, the algorithm converges at a rate of $\sqrt{N}$.
+   
+   We note that each of these random variables is iid. By the Central Limit Theorem, the errors will converge to a normal distribution.
+   
+   so we can calculate low order statistical moments by:
+
+   S\[\frac{1}{N}\mathbf{E}[x_n]\]$
+   
+   Should  which defines variance in the ratio between darts in the circle versus total darts thrown for a single dart as $var(1) = \sigma^2$. Then the variance for $N$ darts can be defined as $var(N) = N^2 \sigma^2$. Thus, the convergence rate of the algorithm is $\frac{var(N)}{var(1)} = N^2$.
+$$
+
 6. For each dart count, make a plot of runtime versus processor count. Each line represents a "strong scaling" study for your code. For each dart count, also plot the "ideal" scaling line. Calculate the parallel scaling efficiency of your code for each dart count. Does the parallel performance vary with dart count? Explain your answer. 
 
 7. Going further. Try running your code on different node types on HPCC with varied core counts. In particular, try to ensure that your runs utilize multiple nodes so that the communication network is used. Do you see a change in the communication cost when the job is run on more than one node?
