@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <iostream>
+#include <fstream>
 
 
 using namespace std;
@@ -20,17 +21,21 @@ using namespace std;
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-#define DARTS 1E3  	/* number of throws at dartboard */
-#define ROUNDS 1000   	/* number of times "darts" is iterated */
+// #define DARTS 1E4  	/* number of throws at dartboard */
+#define ROUNDS 128   	/* number of times "darts" is iterated */
 
 int main(int argc, char *argv[])
 {
-double pi;          	/* average of pi after "darts" is thrown */
+float DARTS;
+double pi,pierror;          	/* average of pi after "darts" is thrown */
 double avepi,localsumpi;       	/* average pi value for all iterations */
 int i, n, localrounds, modrounds;
 double start_time, end_time, elapsed_time;
 
 int numtasks, rank;
+
+DARTS = stod(argv[1]);  // Convert command-line argument to an integer
+// cout << "ndarts "<< argv[1] << endl;
 
 start_time = MPI_Wtime();
    
@@ -43,7 +48,7 @@ MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 srandom (rank);            /* seed the random number generator */
 
 // avepi = 0;
-localsumpi = 0;
+localsumpi = 0.0;
 localrounds = ROUNDS/numtasks;
 modrounds = ROUNDS % numtasks; //need this if rounds not divisible by numtasks
 
@@ -58,17 +63,9 @@ if (modrounds != 0){
 // cout << localrounds << endl;
 
 for (i = 0; i < localrounds; i++) {
-   /* Perform pi calculation on serial processor */
    pi = dboard(DARTS);
    localsumpi = localsumpi + pi;
-//    avepi = ((avepi * i) + pi)/(i + 1); 
-   // printf("   After %3d throws, average value of pi = %10.8f\n",
-   //       (DARTS * (i + 1)),avepi);
-    }    
-// printf("\nReal value of PI: 3.1415926535897 \n");
-
-//need to account for when the total rounds is not divisible by the number of ranks. 
-
+}
 
 //Compute the average of the results over all processes
 double globalmean, globalsum;
@@ -83,9 +80,10 @@ elapsed_time = end_time - start_time;
 
 //Output results only once 
 if (rank == (numtasks -1)) {
-   globalmean = globalsum / ROUNDS;
-   cout << "The average value of PI using " << numtasks << " Processors is " << globalmean <<  endl;
-   cout << "Time elapsed " << elapsed_time <<endl;
+   globalmean = double(globalsum) / double(ROUNDS);
+   pierror = globalmean - 3.141592653589793;
+   cout << "Darts, # proc, pi, time, error,  " << DARTS <<','
+   << numtasks << ',' <<  globalmean<< "," << elapsed_time << "," << pierror  << endl;
 }
 
 
