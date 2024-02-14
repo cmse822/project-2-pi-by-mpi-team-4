@@ -17,6 +17,10 @@
 # "days-hours", or "days-hours:minutes"
 #SBATCH --time=01:00:00
 
+# Standard output and error to file
+# %x: job name, %j: job ID
+#SBATCH --output=%x-%j.SLURMout
+
 # Purge current modules and load those we require
 module purge
 module load GCC/10.3.0 OpenMPI/4.1.1
