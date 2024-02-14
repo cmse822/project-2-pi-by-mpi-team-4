@@ -1,0 +1,29 @@
+#!/bin/bash --login
+# Job name:
+#SBATCH --job-name=mpi-parallel
+
+# Number of nodes
+#SBATCH --nodes=1
+
+# Number of tasks to run on each node
+#SBATCH --ntasks-per-node=32
+
+# Memory per Node
+# Specify "M" or "G" for MB and GB respectively
+#SBATCH --mem=2G
+
+# Wall time
+# Format: "minutes", "hours:minutes:seconds", 
+# "days-hours", or "days-hours:minutes"
+#SBATCH --time=01:00:00
+
+# Purge current modules and load those we require
+module purge
+module load GCC/10.3.0 OpenMPI/4.1.1
+
+# Run our job
+srun a.out
+
+# Print resource information
+scontrol show job $SLURM_JOB_ID
+js -j $SLURM_JOB_ID
