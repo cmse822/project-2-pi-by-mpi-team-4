@@ -54,7 +54,8 @@ for (i = 0; i < ROUNDS; i++) {
 
 //Compute the average of the results over all processes
 double globalmean, globalsum;
-MPI_Allreduce(&avepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+int dest = 0;
+MPI_Reduce(&avepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,dest,MPI_COMM_WORLD);
 cout << "Average Value of PI on Process " << rank << " is " << avepi<< endl;
 
 MPI_Finalize();
@@ -64,13 +65,11 @@ end_time = MPI_Wtime();
 elapsed_time = end_time - start_time;
 
 //Output results only once 
-if (rank == (numtasks -1)) {
+if (rank == dest) {
    globalmean = globalsum / numtasks;
    cout << "The average value of PI using " << numtasks << " Processors is " << globalmean <<  endl;
    cout << "Time elapsed " << elapsed_time <<endl;
 }
-
-
 } //End of main function. 
 
 
