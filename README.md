@@ -112,10 +112,12 @@ Pi is the ratio of a circle's circumference to its diameter. As such, the value 
    S\[\frac{1}{N}\mathbf{E}[x_n]\]$
    
    Should  which defines variance in the ratio between darts in the circle versus total darts thrown for a single dart as $var(1) = \sigma^2$. Then the variance for $N$ darts can be defined as $var(N) = N^2 \sigma^2$. Thus, the convergence rate of the algorithm is $\frac{var(N)}{var(1)} = N^2$.
-$$
+
 
 6. For each dart count, make a plot of runtime versus processor count. Each line represents a "strong scaling" study for your code. For each dart count, also plot the "ideal" scaling line. Calculate the parallel scaling efficiency of your code for each dart count. Does the parallel performance vary with dart count? Explain your answer. 
-
+![Alt text](part4_p6_1e3.png)
+![Alt text](part4_p6_1e6.png)
+![Alt text](part4_p6_1e9.png)
 7. Going further. Try running your code on different node types on HPCC with varied core counts. In particular, try to ensure that your runs utilize multiple nodes so that the communication network is used. Do you see a change in the communication cost when the job is run on more than one node?
 
 ## What to turn-in
