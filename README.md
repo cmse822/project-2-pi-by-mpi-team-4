@@ -28,9 +28,7 @@ As a group, complete the following exercises from [HPSC](../assets/EijkhoutIntro
 - Exercise 2.21 (image below)
 ![alt text](Exercise_2.21.png)
 
-- Exercise 2.22
-- Exercise 2.23
-- Exercise 2.27
+![Alt text](2.22_2.27.png)
 
 Include your responses to these exercises in your project write-up.
 
