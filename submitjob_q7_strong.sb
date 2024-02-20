@@ -26,7 +26,7 @@ module purge
 module load GCC/10.3.0 OpenMPI/4.1.1
 
 # Run our job
-csv_file_name='Q7.csv'
+csv_file_name='Q7_strong.csv'
 num_nodes=2
 process_per_node=32
 
@@ -34,7 +34,7 @@ darts=(1e8)
 
 for i in {1..3}; do
 	for d in "${darts[@]}"; do
-        srun par_pi_q7.exe $d $csv_file_name
+        srun par_pi_q7_strong.exe $d $csv_file_name
 	done
 done
 
