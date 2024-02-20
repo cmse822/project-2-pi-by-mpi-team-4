@@ -16,100 +16,78 @@
 #include <iostream>
 #include <fstream>
 
-
 using namespace std;
-
 
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-// #define DARTS 1E4  	/* number of throws at dartboard */
-#define ROUNDS 128   	/* number of times "darts" is iterated */
+#define DARTS 1E7 	/* number of throws at dartboard */
 
 int main(int argc, char *argv[])
 {
-float DARTS;
-double pi,pierror;          	/* average of pi after "darts" is thrown */
-double avepi,localsumpi;       	/* average pi value for all iterations */
-int i, n, localrounds, modrounds;
-double start_time, end_time, elapsed_time;
+   int ROUNDS;
+   double pi,pierror;          	/* average of pi after "darts" is thrown */
+   double avepi,localavepi;       	/* average pi value for all iterations */
+   int i, n;
+   double start_time, end_time, elapsed_time;
+   int numtasks, rank;
 
+   ROUNDS = stod(argv[1]);  // Convert command-line argument to an integer
+   const char* csvfile = argv[2]; //get the name for the csv output file
 
-int numtasks, rank;
+   start_time = MPI_Wtime();
+      
+   MPI_Init(&argc, &argv);
+   MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-DARTS = stod(argv[1]);  // Convert command-line argument to an integer
+   srandom (rank);            /* seed the random number generator */
 
-const char* csvfile = argv[2]; //get the name for the csv output file
+   for (i = 0; i < ROUNDS; i++) {
+      pi = dboard(DARTS);
+      localavepi = ((localavepi * i) + pi)/(i + 1); 
+   }
 
-start_time = MPI_Wtime();
-   
-MPI_Init(&argc, &argv);
-MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   //Compute the average of the results over all processes
+   double globalmean, globalsum;
+   int dest = 0;
+   MPI_Reduce(&localavepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,dest,MPI_COMM_WORLD);
 
+   MPI_Finalize();
 
+   end_time = MPI_Wtime();
 
-srandom (rank);            /* seed the random number generator */
+   elapsed_time = end_time - start_time;
 
-localsumpi = 0.0;
-localrounds = ROUNDS/numtasks;
-modrounds = ROUNDS % numtasks; //need this if rounds not divisible by numtasks
+   //Output results only once 
+   if (rank == dest) {
+      globalmean = double(globalsum) / double(numtasks);
+      pierror = globalmean - 3.141592653589793;
+      cout << "Darts, # proc, pi, time, error,  " << DARTS <<','
+      << numtasks << ',' <<  globalmean<< "," << elapsed_time << "," << pierror  << endl;
 
-//if there are remaining rounds, add them to the final rank. 
-if (modrounds != 0){
-    if (rank == (numtasks -1)) {
-        localrounds = localrounds + modrounds; 
-    }
-    
-}
+      //things for output file
+      std::ifstream infile(csvfile);
+         //check if file is empty
+         bool is_empty = infile.peek() == std::ifstream::traits_type::eof();
+         infile.close();
 
-// cout << localrounds << endl;
+         // Open the CSV file for writing (appending mode)
+         std::ofstream file(csvfile, std::ios_base::app); // app = append mode
 
-for (i = 0; i < localrounds; i++) {
-   pi = dboard(DARTS);
-   localsumpi = localsumpi + pi;
-}
+         // Write header if the file is empty
+         if (is_empty) {
+               file << "Darts, Rounds, # proc, pi, time, error" << std::endl;
+         }
 
-//Compute the average of the results over all processes
-double globalmean, globalsum;
-MPI_Allreduce(&localsumpi,&globalsum,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-
-MPI_Finalize();
-
-end_time = MPI_Wtime();
-
-elapsed_time = end_time - start_time;
-
-//Output results only once 
-if (rank == (numtasks -1)) {
-   globalmean = double(globalsum) / double(ROUNDS);
-   pierror = globalmean - 3.141592653589793;
-   cout << "Darts, # proc, pi, time, error,  " << DARTS <<','
-   << numtasks << ',' <<  globalmean<< "," << elapsed_time << "," << pierror  << endl;
-
-//things for output file
-   std::ifstream infile(csvfile);
-      //check if file is empty
-        bool is_empty = infile.peek() == std::ifstream::traits_type::eof();
-        infile.close();
-
-        // Open the CSV file for writing (appending mode)
-        std::ofstream file(csvfile, std::ios_base::app); // app = append mode
-
-        // Write header if the file is empty
-        if (is_empty) {
-            file << "Darts, # proc, pi, time, error" << std::endl;
-        }
-
-        // Write results to the CSV file
-        if (file.is_open()) {
-            file << DARTS << ',' << numtasks << ',' << globalmean << ',' << elapsed_time << ',' << pierror << std::endl;
-            file.close();
-        } else {
-            std::cerr << "Error: Unable to open file for writing." << std::endl;
-        }
-    }
-
+         // Write results to the CSV file
+         if (file.is_open()) {
+               file << DARTS << ',' << ROUNDS << ',' << numtasks << ',' << globalmean << ',' << elapsed_time << ',' << pierror << std::endl;
+               file.close();
+         } else {
+               std::cerr << "Error: Unable to open file for writing." << std::endl;
+         }
+   }
 } //End of main function. 
 
 

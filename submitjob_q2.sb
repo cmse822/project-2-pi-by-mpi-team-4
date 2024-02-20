@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 
 # Number of tasks to run on each node
-#SBATCH --ntasks-per-node=32
+#SBATCH --ntasks-per-node=4
 
 # Memory per Node
 # Specify "M" or "G" for MB and GB respectively
@@ -26,7 +26,16 @@ module purge
 module load GCC/10.3.0 OpenMPI/4.1.1
 
 # Run our job
-srun a.out
+csv_file_name='Q2.csv'
+
+rounds=(16 64 128 256)
+processors=(1 2 3 4)
+
+for r in "${rounds[@]}"; do
+    for p in "${processors[@]}"; do
+        srun -n $p par_pi_q2.exe $r $csv_file_name
+    done
+done
 
 # Print resource information
 scontrol show job $SLURM_JOB_ID

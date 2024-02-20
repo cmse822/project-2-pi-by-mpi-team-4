@@ -16,25 +16,23 @@
 #include <iostream>
 #include <fstream>
 
-
 using namespace std;
-
 
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-#define ROUNDS 128   	/* number of times "darts" is iterated */
+#define DARTS 1E7	 /* number of throws at dartboard */
 
 int main(int argc, char *argv[])
 {
-   int DARTS;                  /* number of throws at dartboard */
+   int ROUNDS;
    double pi,pierror;          	/* average of pi after "darts" is thrown */
-   double localavepi;       	/* average pi value for all iterations */
-   int i, n, localdarts, moddarts;
+   double avepi,localsumpi;       	/* average pi value for all iterations */
+   int i, n, localrounds, modrounds;
    double start_time, end_time, elapsed_time;
    int numtasks, rank;
 
-   DARTS = stod(argv[1]);  // Convert command-line argument to an integer
+   ROUNDS = stod(argv[1]);  // Convert command-line argument to an integer
    const char* csvfile = argv[2]; //get the name for the csv output file
 
    start_time = MPI_Wtime();
@@ -45,27 +43,27 @@ int main(int argc, char *argv[])
 
    srandom (rank);            /* seed the random number generator */
 
-   localavepi = 0.0;
-   localdarts = DARTS/numtasks;
-   moddarts = DARTS % numtasks; //need this if rounds not divisible by numtasks
+   localsumpi = 0.0;
+   localrounds = ROUNDS/numtasks;
+   modrounds = ROUNDS % numtasks; //need this if rounds not divisible by numtasks
 
-   // Add the remaining darts to each one until darts run out 
-   if (moddarts != 0){
-      if (rank < moddarts) {
-         localdarts = localdarts + 1; 
+   // Add the remaining rounds to each one until all rounds are done 
+   if (modrounds != 0){
+      if (rank < modrounds) {
+         localrounds = localrounds + 1; 
       } 
    }
 
-   for (i = 0; i < ROUNDS; i++) {
-      pi = dboard(localdarts);
-      localavepi = ((localavepi * i) + pi)/(i + 1); 
+   for (i = 0; i < localrounds; i++) {
+      pi = dboard(DARTS);
+      localsumpi = localsumpi + pi;
    }
 
    //Compute the average of the results over all processes
    double globalmean, globalsum;
    int dest = 0;
-   MPI_Reduce(&localavepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,dest,MPI_COMM_WORLD);
-   
+   MPI_Reduce(&localsumpi,&globalsum,1,MPI_DOUBLE,MPI_SUM,dest,MPI_COMM_WORLD);
+
    MPI_Finalize();
 
    end_time = MPI_Wtime();
@@ -74,33 +72,33 @@ int main(int argc, char *argv[])
 
    //Output results only once 
    if (rank == dest) {
-      globalmean = double(globalsum) / double(numtasks);
+      globalmean = double(globalsum) / double(ROUNDS);
       pierror = globalmean - 3.141592653589793;
       cout << "Darts, # proc, pi, time, error,  " << DARTS <<','
       << numtasks << ',' <<  globalmean<< "," << elapsed_time << "," << pierror  << endl;
 
-   //things for output file
-   std::ifstream infile(csvfile);
+      //things for output file
+      std::ifstream infile(csvfile);
          //check if file is empty
-        bool is_empty = infile.peek() == std::ifstream::traits_type::eof();
-        infile.close();
+         bool is_empty = infile.peek() == std::ifstream::traits_type::eof();
+         infile.close();
 
-        // Open the CSV file for writing (appending mode)
-        std::ofstream file(csvfile, std::ios_base::app); // app = append mode
+         // Open the CSV file for writing (appending mode)
+         std::ofstream file(csvfile, std::ios_base::app); // app = append mode
 
-        // Write header if the file is empty
-        if (is_empty) {
-            file << "Darts, # proc, pi, time, error" << std::endl;
-        }
+         // Write header if the file is empty
+         if (is_empty) {
+               file << "Darts, Rounds, # proc, pi, time, error" << std::endl;
+         }
 
-        // Write results to the CSV file
-        if (file.is_open()) {
-            file << DARTS << ',' << numtasks << ',' << globalmean << ',' << elapsed_time << ',' << pierror << std::endl;
-            file.close();
-        } else {
-            std::cerr << "Error: Unable to open file for writing." << std::endl;
-        }
-    }
+         // Write results to the CSV file
+         if (file.is_open()) {
+               file << DARTS << ',' << ROUNDS << ',' << numtasks << ',' << globalmean << ',' << elapsed_time << ',' << pierror << std::endl;
+               file.close();
+         } else {
+               std::cerr << "Error: Unable to open file for writing." << std::endl;
+         }
+   }
 } //End of main function. 
 
 
