@@ -97,6 +97,8 @@ Pi is the ratio of a circle's circumference to its diameter. As such, the value 
  - The runtime increases slightly with increasing number of processors, as shown in the figure below. The MPI_Reduce collective requires all processors to finish their threads of execution. In this case, all of the ranks are running the same executable. Therefore, the total parallel calculation can only be as fast as the slowest processor. Also, there is increased communication overhead as more processors are used. For these reasons we can expect the runtime to increase slightly as more processors are added.
 ![Alt text](part4_p2.png)
 3. Now, divide the number of "rounds" up amongst the number of ranks using the appropriate MPI routines to decide how to distribute the work. Again, run the program on 1 to 4 ranks. How does the runtime vary now?
+- the runtime now decreases significantly with increasing processor count. To achieve this result, The number of darts was increased to 1e6 for both tests. With lower dart count (such as 1e3), the runtime increased in both Q2 and Q3. This was due to the communication overhead being significantly larger than the computational cost with lower dart count. 
+![Alt text](part4_p3.png)
 
 4. Now let's change the number of "darts" and ranks. Use your MPI program to compute `pi` using total numbers of "darts" of 1E3, 1E6, and 1E9\. For each dart count, run your code on HPCC with processor counts of 1, 2, 4, 8, 16, 32, and 64\. Keep track of the resulting value of `pi` and the runtimes. Use non-interactive jobs and modify the `submitjob.sb` script as necessary. 
 
