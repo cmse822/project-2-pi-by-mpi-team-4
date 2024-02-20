@@ -1,0 +1,39 @@
+#!/bin/bash --login
+# Job name:
+#SBATCH --job-name=mpi-parallel
+
+# Number of nodes
+#SBATCH --nodes=1
+
+# Memory per Node
+# Specify "M" or "G" for MB and GB respectively
+#SBATCH --mem=2G
+
+# Wall time
+# Format: "minutes", "hours:minutes:seconds", 
+# "days-hours", or "days-hours:minutes"
+#SBATCH --time=03:00:00
+
+# Standard output and error to file
+# %x: job name, %j: job ID
+#SBATCH --output=%x-%j.SLURMout
+
+# Purge current modules and load those we require
+module purge
+module load GCC/10.3.0 OpenMPI/4.1.1
+
+# Run our job
+csv_file_name='Q4.csv'
+
+darts=(1e3 1e6 1e9)
+processors=(1 2 4 8 16 32 64)
+
+for d in "${darts[@]}"; do
+    for p in "${processors[@]}"; do
+        srun -n $p --time=1:00:00 par_pi_calc_Q4.exe $d $csv_file_name
+    done
+done
+
+# Print resource information
+scontrol show job $SLURM_JOB_ID
+js -j $SLURM_JOB_ID
