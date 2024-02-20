@@ -1,20 +1,18 @@
 /***************************************************************************
  * FILE: ser_pi_calc.c
  * DESCRIPTION:  
- *   Parallel pi Calculation - C Version
+ *   Serial pi Calculation - C Version
  *   This program calculates pi using a "dartboard" algorithm.  See
  *   Fox et al.(1988) Solving Problems on Concurrent Processors, vol.1
  *   page 207.  
  * AUTHOR: unknown
  * REVISED: 02/23/12 Blaise Barney
- * Dan - Note that this version taked the number of darts and the output file 
- *       name as an input via the cmd arguments.
 ***************************************************************************/
 // #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 
 using namespace std;
@@ -23,23 +21,23 @@ using namespace std;
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-// #define DARTS 1E4  	/* number of throws at dartboard */
-#define ROUNDS 128   	/* number of times "darts" is iterated */
+// #define DARTS 10000   	/* number of throws at dartboard */
+#define ROUNDS 100   	/* number of times "darts" is iterated */
 
 int main(int argc, char *argv[])
 {
 float DARTS;
-double pi,pierror;          	/* average of pi after "darts" is thrown */
-double avepi,localsumpi;       	/* average pi value for all iterations */
-int i, n, localrounds, modrounds;
+double pi,pierror;;          	/* average of pi after "darts" is thrown */
+double avepi;       	/* average pi value for all iterations */
+int i, n;
 double start_time, end_time, elapsed_time;
-
 
 int numtasks, rank;
 
-DARTS = 1e6;  // Convert command-line argument to an integer
 
-const char* csvfile = argv[2]; //get the name for the csv output file
+DARTS = 1e6;
+
+const char* csvfile = argv[2];
 
 start_time = MPI_Wtime();
    
@@ -50,29 +48,22 @@ MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 
 srandom (rank);            /* seed the random number generator */
-
-localsumpi = 0.0;
-localrounds = ROUNDS/numtasks;
-modrounds = ROUNDS % numtasks; //need this if rounds not divisible by numtasks
-
-//if there are remaining rounds, add them to the final rank. 
-if (modrounds != 0){
-    if (rank == (numtasks -1)) {
-        localrounds = localrounds + modrounds; 
-    }
-    
-}
-
-// cout << localrounds << endl;
-
-for (i = 0; i < localrounds; i++) {
+avepi = 0;
+for (i = 0; i < ROUNDS; i++) {
+   /* Perform pi calculation on serial processor */
    pi = dboard(DARTS);
-   localsumpi = localsumpi + pi;
-}
+   avepi = ((avepi * i) + pi)/(i + 1); 
+   // printf("   After %3d throws, average value of pi = %10.8f\n",
+   //       (DARTS * (i + 1)),avepi);
+    }    
+// printf("\nReal value of PI: 3.1415926535897 \n");
+
 
 //Compute the average of the results over all processes
 double globalmean, globalsum;
-MPI_Allreduce(&localsumpi,&globalsum,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+int dest = 0;
+MPI_Reduce(&avepi,&globalsum,1,MPI_DOUBLE,MPI_SUM,dest,MPI_COMM_WORLD);
+cout << "Average Value of PI on Process " << rank << " is " << avepi<< endl;
 
 MPI_Finalize();
 
@@ -81,13 +72,14 @@ end_time = MPI_Wtime();
 elapsed_time = end_time - start_time;
 
 //Output results only once 
-if (rank == (numtasks -1)) {
-   globalmean = double(globalsum) / double(ROUNDS);
+if (rank == dest) {
+   globalmean = globalsum / numtasks;
    pierror = globalmean - 3.141592653589793;
-   cout << "Darts, # proc, pi, time, error,  " << DARTS <<','
-   << numtasks << ',' <<  globalmean<< "," << elapsed_time << "," << pierror  << endl;
-
-//things for output file
+   cout << "The average value of PI using " << numtasks << " Processors is " << globalmean <<  endl;
+   cout << "Time elapsed " << elapsed_time <<endl;
+ 
+ 
+ //things for output file
    std::ifstream infile(csvfile);
       //check if file is empty
         bool is_empty = infile.peek() == std::ifstream::traits_type::eof();
@@ -107,8 +99,12 @@ if (rank == (numtasks -1)) {
             file.close();
         } else {
             std::cerr << "Error: Unable to open file for writing." << std::endl;
-        }
-    }
+        }  
+
+
+}
+
+
 
 } //End of main function. 
 
