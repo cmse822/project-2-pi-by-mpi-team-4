@@ -27,7 +27,7 @@ double dboard (int darts);
 
 int main(int argc, char *argv[])
 {
-   float DARTS;                  /* number of throws at dartboard */
+   int DARTS;                  /* number of throws at dartboard */
    double pi,pierror;          	/* average of pi after "darts" is thrown */
    double localavepi;       	/* average pi value for all iterations */
    int i, n, localdarts, moddarts;
