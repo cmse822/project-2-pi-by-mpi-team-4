@@ -85,6 +85,7 @@ The following is a very quick tutorial on the basics of using HPCC for this clas
  - - each processor outputs the print statements before the initialize statements, between the init and finalize statement, and after the finalize. each processor runs the entire executable, so executes all of the print statements
 
 5. Complete Exercises 2.3, 2.4, and 2.5 in the [Parallel Programing](../assets/EijkhoutParallelProgramming.pdf) book.
+- Done, see "ParrallelTextbookQs2.3.cpp", "ParrallelTextbookQs2.4.cpp", and "ParrallelTextbookQs2.5.cpp",
 
 ## Part 4: Eat Some Pi 
 
