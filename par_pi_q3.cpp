@@ -21,7 +21,7 @@ using namespace std;
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-#define DARTS 1E8 	/* number of throws at dartboard */
+#define DARTS 1E7	 /* number of throws at dartboard */
 
 int main(int argc, char *argv[])
 {
