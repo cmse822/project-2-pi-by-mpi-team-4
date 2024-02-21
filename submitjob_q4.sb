@@ -6,11 +6,11 @@
 #SBATCH --nodes=1
 
 # Number of tasks to run on each node
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks-per-node=64
 
 # Memory per Node
 # Specify "M" or "G" for MB and GB respectively
-#SBATCH --mem=60G
+#SBATCH --mem=10G
 
 # Wall time
 # Format: "minutes", "hours:minutes:seconds", 
