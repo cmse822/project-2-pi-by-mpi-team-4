@@ -82,7 +82,8 @@ The following is a very quick tutorial on the basics of using HPCC for this clas
     ```
 
 4. Add the commands `MPI_Init` and `MPI_Finalize` to your code. Put three different print statements in your code: one before the init, one between init and finalize, and one after the finalize. Recompile and run the executable, both in serial and with `mpiexec`, and explain the output.
- - - each processor outputs the print statements before the initialize statements, between the init and finalize statement, and after the finalize. each processor runs the entire executable, so executes all of the print statements
+
+ - Each processor outputs the print statements before the initialize statements, between the init and finalize statement, and after the finalize. Each processor runs the entire executable, so executes all of the print statements
 
 5. Complete Exercises 2.3, 2.4, and 2.5 in the [Parallel Programing](../assets/EijkhoutParallelProgramming.pdf) book.
 - Done, see "ParrallelTextbookQs2.3.cpp", "ParrallelTextbookQs2.4.cpp", and "ParrallelTextbookQs2.5.cpp",
@@ -93,14 +94,23 @@ Pi is the ratio of a circle's circumference to its diameter. As such, the value 
 
 1. Look at the C program `ser_pi_calc`. Extend this program using collective MPI routines to compute `pi` in parallel using the method described above. Feel free to use C++, if you prefer, of course.
 
+We created separate files for each corresponding question.
+
 2. For the first iteration, perform the same number of "rounds" on each MPI rank. Measure the total runtime using `MPI_WTIME()`. Vary the number of ranks used from 1 to 4. How does the total runtime change?
+
  - The runtime increases slightly with increasing number of processors, as shown in the figure below. The MPI_Reduce collective requires all processors to finish their threads of execution. In this case, all of the ranks are running the same executable. Therefore, the total parallel calculation can only be as fast as the slowest processor. Also, there is increased communication overhead as more processors are used. For these reasons we can expect the runtime to increase slightly as more processors are added.
+
 ![Alt text](part4_p2.png)
+
 3. Now, divide the number of "rounds" up amongst the number of ranks using the appropriate MPI routines to decide how to distribute the work. Again, run the program on 1 to 4 ranks. How does the runtime vary now?
-- the runtime now decreases significantly with increasing processor count. To achieve this result, The number of darts was increased to 1e6 for both tests. With lower dart count (such as 1e3), the runtime increased in both Q2 and Q3. This was due to the communication overhead being significantly larger than the computational cost with lower dart count. 
+
+- The runtime now decreases significantly with increasing processor count. To achieve this result, The number of darts was increased to 1e6 for both tests. With lower dart count (such as 1e3), the runtime increased in both Q2 and Q3. This was due to the communication overhead being significantly larger than the computational cost with lower dart count.
+
 ![Alt text](part4_p3.png)
 
 4. Now let's change the number of "darts" and ranks. Use your MPI program to compute `pi` using total numbers of "darts" of 1E3, 1E6, and 1E9\. For each dart count, run your code on HPCC with processor counts of 1, 2, 4, 8, 16, 32, and 64\. Keep track of the resulting value of `pi` and the runtimes. Use non-interactive jobs and modify the `submitjob.sb` script as necessary. 
+
+This has been implemented in par_pi_q4.cpp and the corresponding job file is available in submitjob_q4.sb.
 
 5. For each processor count, plot the resulting errors in your computed values of `pi` compared to the true value as functions of the number of darts used to compute it. Use log-log scaling on this plot. What is the rate of convergence of your algorithm for computing `pi`? Does this value make sense? Does the error or rate of convergence to the correct answer vary with processor count? Should it? 
    
@@ -119,7 +129,20 @@ Pi is the ratio of a circle's circumference to its diameter. As such, the value 
 ![Alt text](part4_p6_1e3.png)
 ![Alt text](part4_p6_1e6.png)
 ![Alt text](part4_p6_1e9.png)
+
 7. Going further. Try running your code on different node types on HPCC with varied core counts. In particular, try to ensure that your runs utilize multiple nodes so that the communication network is used. Do you see a change in the communication cost when the job is run on more than one node?
+
+In order to test strong scaling performance, we fixed the total number of darts (1e9) and the number of processors per node (32). The darts were equally split among all processors in all nodes and the number of nodes were increased from 1 to 5. From the figure below, it is clear that the algorithm has strong scaling capabilities, as the runtime goes down proportionally with the increase in number of nodes.
+
+![Alt text](q7_strong.png)
+
+In order to test weak scaling performance, we fixed the number of darts per processor (1e7), the number of processors per node (32) and the number of nodes were gradually increased from 1 to 5. The performance remains almost same with the increase in the number of nodes, which illustrates weak scaling capabilties of the algorithm.
+
+![Alt text](q7_weak.png)
+
+In order to test how much communication between nodes will affect performance, we fixed the total number of darts (1e9) and total number of processors (96). We changed the number of nodes and number of processors per node appropriately to maintain the total number of processors. As expected, when the number of nodes are increased, the total times increases, reflecting that the additional time is used for communication. Eventhough it is not significant in this case, as only one value is shared at the end, this could cause serious degradation in performance, when more frequent communication occurs.
+
+![Alt text](q7_comm.png)
 
 ## What to turn-in
 
